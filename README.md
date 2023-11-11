@@ -1,3 +1,3 @@
 # bellabula.github.io
 
-http://begua.onthewifi.com/
+https://begua.onthewifi.com/
