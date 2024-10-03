@@ -1,0 +1,25 @@
+@import url(style_all.css);
+
+#pagehead {
+    background-image: url(../img/about/1007601999.png);
+    height: 600px;
+}
+
+@media (max-width: 1200px) {
+
+}
+
+@media (max-width: 768px) {
+    #pagehead {
+        height: 400px !important;
+    }
+}
+
+.nav-pills .nav-link:hover {
+    color: white;
+    background-color: lightgray;
+}
+
+.nav-pills .nav-link.active {
+    background-color: black;
+}

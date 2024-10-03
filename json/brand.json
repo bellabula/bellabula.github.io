@@ -1,0 +1,14 @@
+{
+  "partner" : [
+    {"brand":"Gopro運動相機", "item":"gopro 8~10、gopro配件", "link":"https://www.showfun.com.tw/product-list.ftl?lg=GOPRO"},
+    {"brand":"Wensotti威騰眼鏡", "item":"運動太陽眼鏡、水上浮力眼鏡", "link":"https://www.wensotti.com/"},
+    {"brand":"Sporty司普堤", "item":"自行車服飾、機能壓縮服飾、運動機能服飾", "link":"https://www.sporty.com.tw/"},
+    {"brand":"Aropec金鴻水上用品", "item":"潛水、溯溪、衝浪、游泳...", "link":"https://zh-tw.aropec.com/"},
+    {"brand":"SEA Y'ALL配飾", "item":"衝浪項鍊、腳環、手環、手工編繩", "link":"https://shopee.tw/st213024?categoryId=100009&itemId=13004053955"},
+    {"brand":"Aztron SUP", "item":"各類款式SUP、配件", "link":"https://www.metroasis.com.tw/v2/official/SalePageCategory/302794?lang=zh-TW&sortMode=Curator"},
+    {"brand":"Aquatone SUP", "item":"各類款式SUP、配件", "link":"https://www.metroasis.com.tw/v2/official/SalePageCategory/81906?sortMode=Newest"},
+    {"brand":"Jacko、Bach、Granite Gear", "item":"登山包、登山杖...", "link":""},
+    {"brand":"ROXY", "item":"衝浪服飾、比基尼", "link":""},
+    {"brand":"啾啾鳥咖啡", "item":"濾掛咖啡", "link":""}
+  ]
+}

@@ -1,0 +1,16 @@
+@import url(style_all.css);
+
+#mainContent li {
+    list-style-type: none;
+}
+
+#mainContent ul img {
+    margin: 0;
+}
+
+#mainContent iframe.set-middle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

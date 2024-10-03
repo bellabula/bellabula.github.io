@@ -1,0 +1,56 @@
+@import url(style_all.css);
+
+#pagehead {
+    background-attachment: fixed;
+    background-image: url(../img/about/872776107.jpg);
+    height: initial;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-position-y: 0;
+}
+
+.row {
+    --bs-gutter-x: 0;
+}
+
+#team.showAnimate {
+    animation: showup 2.5s;
+}
+
+#teamCons .icon-size {
+    width: 50px
+}
+#teamCons h4 {
+    margin: 1rem auto;
+    text-align: center;
+    font-family: "jf";
+}
+
+#teamCons p {
+    padding:0 30px;
+    text-align: justify;
+}
+
+#teamCons div div {
+    margin-bottom: 20px;
+}
+
+@keyframes showup {
+    0% {opacity: 0}
+    100% {opacity:1}
+}
+
+
+/* @media (max-width: 1200px) {
+    #pagehead {
+        height: 550px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #pagehead {
+        height: 400px !important;
+    }
+} */

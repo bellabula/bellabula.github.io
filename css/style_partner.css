@@ -1,0 +1,96 @@
+@import url(style_all.css);
+
+#pagehead {
+    background-color: lightgray;
+    background-image: url();
+    height: 600px;
+}
+
+#pagehead p {
+    font-size: 20px;
+}
+
+#mainContent {
+    margin: 3rem 6rem;
+}
+
+/* .pagehead-center {
+    position: absolute;
+} */
+
+h1 span {
+    font-size: 2rem;
+}
+
+.row {
+    margin: 24px;
+}
+
+.col-4 {
+    padding: 20px;
+}
+
+figure div {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+figure {
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+figure:hover {
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2), 0 4px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+figcaption h4 {
+    margin: 20px auto;
+    text-decoration: underline;
+    text-decoration-color: #0adc7557;
+    text-decoration-thickness: 5px;
+    text-underline-offset: 8px;
+}
+
+figcaption p {
+    font-size: 20px;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+}
+
+a:hover {
+    color:black
+}
+
+@media (max-width: 1200px) {
+    #mainContent {
+        margin: 2rem 4rem;
+    }
+    #pagehead p {
+        font-size: 16px;
+    }
+    h1 span {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #pagehead {
+        height: 400px !important;
+    }
+    h1 span {
+        font-size: 1rem;
+    }
+    #mainContent {
+        margin: 1rem 2rem;
+    }
+    .row {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+}

@@ -1,0 +1,118 @@
+@import url(style_all.css);
+
+#pagehead {
+    background-image: url(../img/about/cliff_2.jpg);
+    height: 700px;
+    background-position: bottom;
+}
+
+.home-title {
+    font-size: 80px;
+    font-family: "Vanilla";
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: 100;
+    color: white;
+}
+
+.row {
+    --bs-gutter-x: 0;
+}
+
+#mainContent .showOut {
+    visibility: hidden;
+}
+
+#mainContent li {
+    list-style-type: none;
+}
+
+#mainContent img {
+    width: 80%;
+}
+
+#mainContent img.icon-size {
+    filter: var(--lightbrown-color-filter);
+    width: 40px;
+    margin: 10px 0;
+}
+
+#mainContent img.setmiddle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#mainContact {
+    margin-left: 48px;
+    margin-right: 48px;
+}
+
+#mainContact h1 {
+    font-family: "AlexBrush";
+    text-decoration: underline;
+    text-underline-offset: 15px;
+}
+
+#mainContact div:nth-of-type(2) {
+    padding-left: 10px;
+}
+
+#usermail {
+    border: 1px solid lightgray;
+    text-align: left;
+    padding: 10px;
+    width: 80%;
+}
+
+input,
+textarea {
+    width: 100%;
+}
+
+#mainContent button {
+    display: block;
+    margin: auto;
+    width: 100px;
+    height: 50px;
+    border-radius: 10%;
+    margin-top: 10px;
+    background-color: var(--lightbrown-color);
+    border-color: var(--lightbrown-color);
+}
+
+#mailBox {
+    margin: 48px;
+}
+#mailBox h1 {padding-left: 15%;}
+#mailBox p {padding-top: 8%;}
+textarea {
+    height: 100px;
+}
+
+@media (max-width: 768px) {
+    .home-title {
+        font-size: 50px;
+    }
+    #mainContact {
+        margin-left: 24px;
+        margin-right: 24px;
+    }
+    #mailBox {
+        margin: 24px;
+        width: 95%;
+    }
+    ul {
+        padding-left: 0;
+    }
+    #mainContact h1 {
+        text-underline-offset: 8px;
+    }
+    #mailBox div:nth-of-type(1) {
+        text-align: left;
+    }
+    #mailBox h1 {padding-left: 5px;}
+    #mailBox p {padding-top: 10px;}
+    #mailBox form {margin: auto;}
+}

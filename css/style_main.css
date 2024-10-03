@@ -1,0 +1,110 @@
+@import url(style_all.css);
+
+body {
+    margin:0;
+}
+
+.row {
+    --bs-gutter-x: 0;
+}
+
+.home-title {
+    font-size: 48px;
+    font-family: "Vanilla";
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: 100;
+    color: gold;
+}
+
+.home-title1 {
+    font-size: 58px;
+    font-family: "Virgo 01";
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: 100;
+    color: #fff;
+}
+
+@media (max-width: 1200px) {
+    #pagehead {
+        height: 500px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #pagehead {
+        height: 300px !important;
+    }
+    .home-title {
+        font-size: 36px;
+    }
+    .home-title1 {
+        font-size: 48px;
+    }
+}
+
+#pagehead {
+    background-image: url(../img/main/1385585816.jpg);
+    height: 750px;
+    margin-top: 50px;
+}
+
+/* #mainContent .squareBox {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+} */
+
+#mainContent .squareBox img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.acthover:hover img {
+    opacity: 0.2;
+}
+
+.hoverText {
+    visibility: hidden;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "NaikaiFont";
+    color: yellow;
+}
+
+.showAnimate {
+    animation: showup 2.5s;
+}
+
+@keyframes showup {
+    0% {opacity: 0}
+    100% {opacity:1}
+}
+
+.video-size {
+    width: 100%;
+    height: 800px;
+}
+
+#natureVideo h1 {
+    font-size: 56px;
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    font-family: "NaikaiFont-bold";
+    text-shadow: 0 0 3px #000000, 0 0 5px #000000;
+}
+
+#natureVideo p {
+    font-size: 35px;
+    position: absolute;
+    top: 45%;
+    left: 10%;
+    font-family: "NaikaiFont";
+    text-shadow: 0 0 3px #000000, 0 0 5px #000000;
+}
