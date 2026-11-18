@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>未來想像與生涯進路 2 - Ikigai 探索職涯生活</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2b5b84;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 頂部工具列 */
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-clear { background: rgba(255, 255, 255, 0.18); color: white; }
+    .btn-png { background: #10b981; color: white; }
+    .btn-pdf { background: #f59e0b; color: #1e293b; }
+
+    /* 主版面：手機/平板只要橫向 (寬度 > 740px) 就左右並排 */
+    .main-container {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+      gap: 16px;
+      padding: 14px;
+      max-width: 1500px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* 左側：學生互動填答區 */
+    .editor-panel {
+      flex: 1;
+      min-width: 300px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      max-height: calc(100vh - 75px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+      margin: 18px 0 10px 0;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .step-hint {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #334155;
+    }
+
+    .input-group label span.sub {
+      font-weight: 400;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px; /* 防止 iOS 點擊輸入框時自動放大畫面 */
+      background: #f8fafc;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.45;
+    }
+
+    /* 右側：即時預覽區 */
+    .preview-panel {
+      flex: 1.15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      max-height: calc(100vh - 75px);
+    }
+
+    .preview-label {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    /* 外層縮放容器，讓手機橫向也能完整看到整張 A4 */
+    #preview-scale-wrapper {
+      width: 794px;
+      height: 1123px;
+      transform-origin: top center;
+    }
+
+    /* A4 比例學習單畫布 (794px x 1123px) */
+    #worksheet-sheet {
+      width: 794px;
+      height: 1123px;
+      background: #ffffff;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      padding: 34px 40px;
+      color: #111111;
+      overflow: hidden;
+    }
+
+    .ws-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .ws-title-block h2 { margin: 0; font-size: 15.5px; font-weight: 700; }
+    .ws-title-block h1 { margin: 2px 0 6px 0; font-size: 25px; font-weight: 700; }
+    .ws-desc { font-size: 12.5px; line-height: 1.45; color: #222; margin: 0; }
+
+    .ws-student-info {
+      text-align: right;
+      font-size: 14.5px;
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 2px;
+    }
+
+    .ws-info-line {
+      display: inline-block;
+      min-width: 115px;
+      border-bottom: 1.5px solid #222;
+      text-align: center;
+      padding: 0 6px 2px 6px;
+      font-weight: 700;
+      color: #0f172a;
+      min-height: 21px;
+    }
+
+    .venn-wrapper {
+      position: relative;
+      width: 714px;
+      height: 700px;
+      margin: 0 auto;
+    }
+
+    .venn-svg { width: 100%; height: 100%; display: block; }
+
+    .venn-box {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      overflow: hidden;
+      word-break: break-word;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      color: #1e3a8a;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 2px 4px;
+    }
+
+    #view-love { top: 60px; left: 242px; width: 230px; height: 132px; }
+    #view-good { top: 268px; left: 66px; width: 148px; height: 164px; justify-content: center; }
+    #view-need { top: 268px; left: 500px; width: 148px; height: 164px; justify-content: center; }
+    #view-paid { top: 508px; left: 242px; width: 230px; height: 126px; }
+
+    #view-passion { top: 248px; left: 236px; width: 78px; height: 46px; font-size: 11px; line-height: 1.25; color: #0f766e; }
+    #view-mission { top: 248px; left: 400px; width: 78px; height: 46px; font-size: 11px; line-height: 1.25; color: #0f766e; }
+    #view-profession { top: 454px; left: 236px; width: 78px; height: 46px; font-size: 11px; line-height: 1.25; color: #0f766e; }
+    #view-vocation { top: 454px; left: 400px; width: 78px; height: 46px; font-size: 11px; line-height: 1.25; color: #0f766e; }
+    #view-ikigai { top: 350px; left: 325px; width: 64px; height: 44px; font-size: 11px; line-height: 1.25; font-weight: 700; color: #b45309; }
+
+    .ws-questions {
+      position: relative;
+      margin-top: -12px;
+      height: 248px;
+      width: 100%;
+    }
+
+    .q-block { position: absolute; font-size: 12.5px; line-height: 1.45; }
+    .q-title { font-weight: 700; color: #111; margin-bottom: 4px; }
+    .q-answer {
+      color: #1e3a8a;
+      font-weight: 500;
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 5px 8px;
+      border-left: 2.5px solid #94a3b8;
+      background: rgba(241, 245, 249, 0.65);
+      min-height: 52px;
+      font-size: 12px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    #q1-area { top: 0; left: 0; width: 285px; }
+    #q2-area { top: 0; right: 0; width: 285px; }
+    #q3-area { bottom: 0; left: 215px; width: 499px; }
+
+    .paper-plane-svg {
+      position: absolute;
+      bottom: 8px;
+      left: 40px;
+      width: 160px;
+      height: 110px;
+      pointer-events: none;
+    }
+
+    /* 圖片預覽彈窗（專為 iPhone/iPad 長按存圖設計） */
+    #img-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      z-index: 1000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #img-modal p { color: #fff; font-weight: 700; margin-bottom: 10px; text-align: center; }
+    #img-modal img { max-width: 95%; max-height: 75vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    #img-modal button { margin-top: 12px; background: #ef4444; color: white; padding: 10px 24px; }
+
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      color: white;
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* 只有在「直向手機」（寬度小於 740px）才改為上下排列 */
+    @media (max-width: 740px) {
+      .main-container {
+        flex-direction: column;
+      }
+      .editor-panel, .preview-panel {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-overlay">⏳ 正在生成學習單檔案，請稍候...</div>
+
+<!-- iOS 圖片儲存彈窗 -->
+<div id="img-modal">
+  <p>📱 請「長按」下方學習單圖片，選擇「儲存到照片」即可！</p>
+  <img id="generated-img" src="" alt="Ikigai 學習單" />
+  <button onclick="document.getElementById('img-modal').style.display='none'">關閉視窗</button>
+</div>
+
+<header>
+  <h1>🧭 Ikigai 探索職涯生活</h1>
+  <div class="header-actions">
+    <button type="button" class="btn-clear" onclick="clearAll()">🗑️ 清空</button>
+    <button type="button" class="btn-png" onclick="exportWorksheet('png')">🖼️ 存成圖片</button>
+    <button type="button" class="btn-pdf" onclick="exportWorksheet('pdf')">📄 下載 PDF</button>
+  </div>
+</header>
+
+<div class="main-container">
+  <!-- 左側：學生互動填答區 -->
+  <div class="editor-panel">
+    <div class="section-title">基本資料</div>
+    <div class="form-grid-2">
+      <div class="input-group">
+        <label>班級</label>
+        <input type="text" id="in-class" placeholder="請輸入你的班級">
+      </div>
+      <div class="input-group">
+        <label>座號</label>
+        <input type="text" id="in-number" placeholder="請輸入你的座號">
+      </div>
+      <div class="input-group">
+        <label>姓名</label>
+        <input type="text" id="in-name" placeholder="請輸入你的姓名">
+      </div>
+    </div>
+
+    <div class="section-title">第一部分：探索你的四個核心面向</div>
+    <p class="step-hint">從你的生活、學習、人際互動、休閒中，寫下你熱愛、擅長、有價值的事情。</p>
+
+    <div class="input-group">
+      <label>1. 享受的事 <span class="sub">（做什麼事情會讓你感到快樂、忘記時間？）</span></label>
+      <textarea id="in-love" rows="2" placeholder="例如：畫畫、寫程式、聽音樂..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>2. 擅長的事 <span class="sub">（你具備哪些天賦、技能或常被誇獎的能力？）</span></label>
+      <textarea id="in-good" rows="2" placeholder="例如：整理重點、剪輯影片、溝通協調..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>3. 世界需要的事 <span class="sub">（你觀察到社會、環境或身邊的人需要什麼幫助？）</span></label>
+      <textarea id="in-need" rows="2" placeholder="例如：心理健康陪伴、環保減塑..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>4. 別人會付錢請你做的事 <span class="sub">（有哪些工作或服務具有市場價值？）</span></label>
+      <textarea id="in-paid" rows="2" placeholder="例如：網頁設計、心理諮商、影片後製..."></textarea>
+    </div>
+
+    <div class="section-title">第二部分：尋找交集與 Ikigai</div>
+    <p class="step-hint">觀察上面四個圈圈重疊的地方，試著寫出交集點（建議填寫簡短關鍵詞）。</p>
+
+    <div class="form-grid-2">
+      <div class="input-group">
+        <label>🔥 熱情 <span class="sub">（享受＋擅長）</span></label>
+        <input type="text" id="in-passion" placeholder="又喜歡又擅長">
+      </div>
+      <div class="input-group">
+        <label>🌟 使命 <span class="sub">（享受＋世界需要）</span></label>
+        <input type="text" id="in-mission" placeholder="喜歡且能助人">
+      </div>
+      <div class="input-group">
+        <label>💼 專業 <span class="sub">（擅長＋能賺錢）</span></label>
+        <input type="text" id="in-profession" placeholder="能謀生的專長">
+      </div>
+      <div class="input-group">
+        <label>🌱 職志 <span class="sub">（世界需要＋能賺錢）</span></label>
+        <input type="text" id="in-vocation" placeholder="有價值且有收入">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>🎯 我的 Ikigai（生之意義）<span class="sub">（四者交集的核心方向）</span></label>
+      <input type="text" id="in-ikigai" placeholder="試著用簡短一句話總結">
+    </div>
+
+    <div class="section-title">第三部分：生涯反思與科系探索</div>
+
+    <div class="input-group">
+      <label>問題 1：哪一個向度目前最符合你的職涯期待？請寫出這一項事務並說明原因：</label>
+      <textarea id="in-q1" rows="3" placeholder="請寫出向度與具體原因..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>問題 2：缺少的面向，可能會有哪些影響？要達到 Ikigai 可以怎麼做？</label>
+      <textarea id="in-q2" rows="3" placeholder="例如：如果只有熱情但不能賺錢，可能會..."></textarea>
+    </div>
+
+    <div class="input-group">
+      <label>問題 3：這件事物，目前有對應的科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</label>
+      <textarea id="in-q3" rows="3" placeholder="例如：資訊工程學類、心理學類、設計學類..."></textarea>
+    </div>
+  </div>
+
+  <!-- 右側：即時預覽學習單 -->
+  <div class="preview-panel" id="preview-container">
+    <div class="preview-label">👇 即時預覽（右側自動縮放以符合螢幕寬度）</div>
+
+    <div id="preview-scale-wrapper">
+      <div id="worksheet-sheet">
+        <div class="ws-header">
+          <div class="ws-title-block">
+            <h2>未來想像與生涯進路 2 — 生之意義</h2>
+            <h1>Ikigai 探索職涯生活</h1>
+            <p class="ws-desc">
+              請盡可能地寫下每個面向的答案，<br>
+              從你的生活、學習、人際互動、休閒中找出你所熱愛、擅長、有價值的事情。
+            </p>
+          </div>
+          <div class="ws-student-info">
+            <div>班級：<span class="ws-info-line" id="view-class"></span></div>
+            <div>座號：<span class="ws-info-line" id="view-number"></span></div>
+            <div>姓  名：<span class="ws-info-line" id="view-name"></span></div>
+          </div>
+        </div>
+
+        <div class="venn-wrapper">
+          <svg class="venn-svg" viewBox="0 0 714 700" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="357" cy="195" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="357" cy="195" r="181" fill="none" stroke="#1e293b" stroke-width="0.9" stroke-dasharray="12 4" />
+            <circle cx="202" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="512" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="357" cy="505" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+
+            <defs>
+              <path id="arc-top" d="M 225,112 A 156,156 0 0,1 489,112" />
+              <path id="arc-left" d="M 70,268 A 156,156 0 0,0 70,432" />
+              <path id="arc-right" d="M 644,432 A 156,156 0 0,0 644,268" />
+              <path id="arc-bottom" d="M 215,575 A 158,158 0 0,0 499,575" />
+            </defs>
+
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-top" startOffset="50%" text-anchor="middle">享受的事</textPath>
+            </text>
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-left" startOffset="50%" text-anchor="middle">擅長的事</textPath>
+            </text>
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-right" startOffset="50%" text-anchor="middle">世界需要的事</textPath>
+            </text>
+            <text font-size="18" font-weight="700" fill="#111">
+              <textPath href="#arc-bottom" startOffset="50%" text-anchor="middle">別人會付錢請你做的事</textPath>
+            </text>
+
+            <text x="275" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">熱情</text>
+            <text x="439" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">使命</text>
+            <text x="275" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">專業</text>
+            <text x="439" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">職志</text>
+            <text x="357" y="343" font-size="18.5" font-weight="700" fill="#111" text-anchor="middle">ikigai</text>
+          </svg>
+
+          <div class="venn-box" id="view-love"></div>
+          <div class="venn-box" id="view-good"></div>
+          <div class="venn-box" id="view-need"></div>
+          <div class="venn-box" id="view-paid"></div>
+
+          <div class="venn-box" id="view-passion"></div>
+          <div class="venn-box" id="view-mission"></div>
+          <div class="venn-box" id="view-profession"></div>
+          <div class="venn-box" id="view-vocation"></div>
+          <div class="venn-box" id="view-ikigai"></div>
+        </div>
+
+        <div class="ws-questions">
+          <div class="q-block" id="q1-area">
+            <div class="q-title">1. 要找到自己的 ikigai 不是容易事，哪一個向度目前最符合你的職涯期待？請寫出這一項事務並說明原因：</div>
+            <div class="q-answer" id="view-q1"></div>
+          </div>
+
+          <div class="q-block" id="q2-area">
+            <div class="q-title">2. 缺少的面向，可能會有哪些影響？要達到 ikigai 可以怎麼做？</div>
+            <div class="q-answer" id="view-q2"></div>
+          </div>
+
+          <svg class="paper-plane-svg" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 22,95 C 14,95 9,89 9,82 C 9,74 22,62 22,62 C 22,62 35,74 35,82 C 35,89 30,95 22,95 Z" fill="none" stroke="#334155" stroke-width="2"/>
+            <circle cx="22" cy="81" r="4.5" fill="none" stroke="#334155" stroke-width="2"/>
+            <path d="M 35,88 C 65,98 95,82 88,65 C 82,52 68,62 78,74 C 88,85 115,65 132,42" fill="none" stroke="#334155" stroke-width="1.8"/>
+            <polygon points="122,32 168,14 148,54 138,41" fill="#ffffff" stroke="#334155" stroke-width="2" stroke-linejoin="round"/>
+            <polyline points="168,14 138,41 139,52 145,45" fill="none" stroke="#334155" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+
+          <div class="q-block" id="q3-area">
+            <div class="q-title">3. 這件事物，目前有對應的科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</div>
+            <div class="q-answer" id="view-q3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const fields = [
+    'class', 'number', 'name',
+    'love', 'good', 'need', 'paid',
+    'passion', 'mission', 'profession', 'vocation', 'ikigai',
+    'q1', 'q2', 'q3'
+  ];
+
+  // 同步資料與自動字體縮放
+  function syncData() {
+    const saved = {};
+    fields.forEach(key => {
+      const inputEl = document.getElementById('in-' + key);
+      const viewEl = document.getElementById('view-' + key);
+      if (inputEl && viewEl) {
+        const val = inputEl.value;
+        viewEl.textContent = val;
+        saved[key] = val;
+        autoFitFont(viewEl, key);
+      }
+    });
+    try {
+      localStorage.setItem('ikigai_worksheet_data', JSON.stringify(saved));
+    } catch (e) {}
+  }
+
+  function autoFitFont(el, key) {
+    if (key === 'class' || key === 'name') return;
+    const isIntersection = ['passion', 'mission', 'profession', 'vocation', 'ikigai'].includes(key);
+    let fontSize = isIntersection ? 11 : 13;
+    el.style.fontSize = fontSize + 'px';
+
+    while (el.scrollHeight > el.clientHeight && fontSize > 8) {
+      fontSize -= 0.5;
+      el.style.fontSize = fontSize + 'px';
+    }
+  }
+
+  // 自動縮放右側 A4 預覽圖，確保在 iPhone 橫向或 iPad 上完整顯示不需左右捲動
+  function adjustPreviewScale() {
+    const container = document.getElementById('preview-container');
+    const wrapper = document.getElementById('preview-scale-wrapper');
+    if (!container || !wrapper) return;
+    const availableWidth = container.clientWidth - 16;
+    const scale = Math.min(1, availableWidth / 794);
+    wrapper.style.transform = `scale(${scale})`;
+    wrapper.style.height = `${1123 * scale}px`;
+  }
+
+  // 綁定多重輸入監聽（確保 iOS 注音選字即時更新）
+  window.addEventListener('DOMContentLoaded', () => {
+    fields.forEach(key => {
+      const inputEl = document.getElementById('in-' + key);
+      if (inputEl) {
+        ['input', 'change', 'keyup', 'compositionend'].forEach(evt => {
+          inputEl.addEventListener(evt, syncData);
+        });
+      }
+    });
+
+    try {
+      const raw = localStorage.getItem('ikigai_worksheet_data');
+      if (raw) {
+        const data = JSON.parse(raw);
+        fields.forEach(key => {
+          if (data[key]) {
+            const inputEl = document.getElementById('in-' + key);
+            if (inputEl) inputEl.value = data[key];
+          }
+        });
+        syncData();
+      }
+    } catch (e) {}
+
+    adjustPreviewScale();
+    window.addEventListener('resize', adjustPreviewScale);
+  });
+
+  function clearAll() {
+    if (!confirm('確定要清空目前填寫的所有內容嗎？')) return;
+    fields.forEach(key => {
+      const inputEl = document.getElementById('in-' + key);
+      if (inputEl) inputEl.value = '';
+    });
+    try { localStorage.removeItem('ikigai_worksheet_data'); } catch (e) {}
+    syncData();
+  }
+
+  // 匯出為 PNG 或 PDF（相容 iPhone / iPad Safari）
+  async function exportWorksheet(type) {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = 'flex';
+
+    const cls = document.getElementById('in-class').value.trim();
+    const name = document.getElementById('in-name').value.trim();
+    const prefix = [cls, name].filter(Boolean).join('_') || '學生';
+    const fileName = `${prefix}_Ikigai探索職涯生活學習單`;
+
+    const wrapper = document.getElementById('preview-scale-wrapper');
+    const sheet = document.getElementById('worksheet-sheet');
+    const origTransform = wrapper.style.transform;
+    const origShadow = sheet.style.boxShadow;
+
+    try {
+      // 匯出前暫時恢復 1:1 原始尺寸截圖，避免縮小狀態下截圖模糊或偏移
+      wrapper.style.transform = 'scale(1)';
+      sheet.style.boxShadow = 'none';
+
+      const canvas = await html2canvas(sheet, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      if (type === 'png') {
+        const dataUrl = canvas.toDataURL('image/png');
+        if (isIOS) {
+          // iPhone/iPad 直接彈出圖片視窗讓使用者長按儲存到相簿
+          document.getElementById('generated-img').src = dataUrl;
+          document.getElementById('img-modal').style.display = 'flex';
+        } else {
+          const link = document.createElement('a');
+          link.download = `${fileName}.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      } else if (type === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        pdf.save(`${fileName}.pdf`);
+      }
+    } catch (err) {
+      alert('匯出時發生錯誤：' + err.message);
+    } finally {
+      wrapper.style.transform = origTransform;
+      sheet.style.boxShadow = origShadow;
+      overlay.style.display = 'none';
+    }
+  }
+</script>
+
+</body>
+</html>
