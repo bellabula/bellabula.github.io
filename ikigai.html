@@ -127,6 +127,12 @@
       gap: 10px;
     }
 
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
     .input-group {
       margin-bottom: 12px;
     }
@@ -367,10 +373,107 @@
 </header>
 
 <div class="main-container">
-  <!-- 左側：學生互動填答區 -->
+  <!-- 左側：即時預覽學習單 -->
+  <div class="preview-panel" id="preview-container">
+    <div class="preview-label">👇 即時預覽（右側自動縮放以符合螢幕寬度）</div>
+
+    <div id="preview-scale-wrapper">
+      <div id="worksheet-sheet">
+        <div class="ws-header">
+          <div class="ws-title-block">
+            <h2>未來想像與生涯進路 2 — 生之意義</h2>
+            <h1>Ikigai 探索職涯生活</h1>
+            <p class="ws-desc">
+              請盡可能地寫下每個面向的答案，<br>
+              從你的生活、學習、人際互動、休閒中找出你所熱愛、擅長、有價值的事情。
+            </p>
+          </div>
+          <div class="ws-student-info">
+            <div>班  級：<span class="ws-info-line" id="view-class"></span></div>
+            <div>座  號：<span class="ws-info-line" id="view-number"></span></div>
+            <div>姓  名：<span class="ws-info-line" id="view-name"></span></div>
+          </div>
+        </div>
+
+        <div class="venn-wrapper">
+          <svg class="venn-svg" viewBox="0 0 714 700" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="357" cy="195" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="357" cy="195" r="181" fill="none" stroke="#1e293b" stroke-width="0.9" stroke-dasharray="12 4" />
+            <circle cx="202" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="512" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+            <circle cx="357" cy="505" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
+
+            <defs>
+              <path id="arc-top" d="M 225,112 A 156,156 0 0,1 489,112" />
+              <path id="arc-left" d="M 70,268 A 156,156 0 0,0 70,432" />
+              <path id="arc-right" d="M 644,432 A 156,156 0 0,0 644,268" />
+              <path id="arc-bottom" d="M 215,575 A 158,158 0 0,0 499,575" />
+            </defs>
+
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-top" startOffset="50%" text-anchor="middle">享受的事</textPath>
+            </text>
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-left" startOffset="50%" text-anchor="middle">擅長的事</textPath>
+            </text>
+            <text font-size="18.5" font-weight="700" fill="#111">
+              <textPath href="#arc-right" startOffset="50%" text-anchor="middle">世界需要的事</textPath>
+            </text>
+            <text font-size="18" font-weight="700" fill="#111">
+              <textPath href="#arc-bottom" startOffset="50%" text-anchor="middle">別人會付錢請你做的事</textPath>
+            </text>
+
+            <text x="275" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">熱情</text>
+            <text x="439" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">使命</text>
+            <text x="275" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">專業</text>
+            <text x="439" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">職志</text>
+            <text x="357" y="343" font-size="18.5" font-weight="700" fill="#111" text-anchor="middle">ikigai</text>
+          </svg>
+
+          <div class="venn-box" id="view-love"></div>
+          <div class="venn-box" id="view-good"></div>
+          <div class="venn-box" id="view-need"></div>
+          <div class="venn-box" id="view-paid"></div>
+
+          <div class="venn-box" id="view-passion"></div>
+          <div class="venn-box" id="view-mission"></div>
+          <div class="venn-box" id="view-profession"></div>
+          <div class="venn-box" id="view-vocation"></div>
+          <div class="venn-box" id="view-ikigai"></div>
+        </div>
+
+        <div class="ws-questions">
+          <div class="q-block" id="q1-area">
+            <div class="q-title">1. 請AI協作找出你目前的交匯，並寫下一句宣言「現階段我想用【能力】，為【對象】解決【問題】。」</div>
+            <div class="q-answer" id="view-q1"></div>
+          </div>
+
+          <div class="q-block" id="q2-area">
+            <div class="q-title">2. 根據關鍵字，找出目前有對應的學類或科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</div>
+            <div class="q-answer" id="view-q2"></div>
+          </div>
+
+          <svg class="paper-plane-svg" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 22,95 C 14,95 9,89 9,82 C 9,74 22,62 22,62 C 22,62 35,74 35,82 C 35,89 30,95 22,95 Z" fill="none" stroke="#334155" stroke-width="2"/>
+            <circle cx="22" cy="81" r="4.5" fill="none" stroke="#334155" stroke-width="2"/>
+            <path d="M 35,88 C 65,98 95,82 88,65 C 82,52 68,62 78,74 C 88,85 115,65 132,42" fill="none" stroke="#334155" stroke-width="1.8"/>
+            <polygon points="122,32 168,14 148,54 138,41" fill="#ffffff" stroke="#334155" stroke-width="2" stroke-linejoin="round"/>
+            <polyline points="168,14 138,41 139,52 145,45" fill="none" stroke="#334155" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+
+          <div class="q-block" id="q3-area">
+            <div class="q-title">3. 缺口與下一步：「要確認這些學類適不適合我，我還需要查證或體驗什麼？」</div>
+            <div class="q-answer" id="view-q3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側：學生互動填答區 -->
   <div class="editor-panel">
     <div class="section-title">基本資料</div>
-    <div class="form-grid-2">
+    <div class="form-grid-3">
       <div class="input-group">
         <label>班級</label>
         <input type="text" id="in-class" placeholder="請輸入你的班級">
@@ -438,117 +541,22 @@
     <div class="section-title">第三部分：生涯反思與科系探索</div>
 
     <div class="input-group">
-      <label>問題 1：哪一個向度目前最符合你的職涯期待？請寫出這一項事務並說明原因：</label>
-      <textarea id="in-q1" rows="3" placeholder="請寫出向度與具體原因..."></textarea>
+      <label>問題 1：請AI協作找出你目前的交匯，並寫下一句宣言「現階段我想用【能力】，為【對象】解決【問題】。」</label>
+      <textarea id="in-q1" rows="3" placeholder="現階段我想用【能力】，為【對象】解決【問題】..."></textarea>
     </div>
 
     <div class="input-group">
-      <label>問題 2：缺少的面向，可能會有哪些影響？要達到 Ikigai 可以怎麼做？</label>
-      <textarea id="in-q2" rows="3" placeholder="例如：如果只有熱情但不能賺錢，可能會..."></textarea>
+      <label>問題 2：根據關鍵字，找出目前有對應的學類或科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</label>
+      <textarea id="in-q2" rows="3" placeholder="例如：資訊工程學類、心理學類、設計學類...，因為..."></textarea>
     </div>
 
     <div class="input-group">
-      <label>問題 3：這件事物，目前有對應的科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</label>
-      <textarea id="in-q3" rows="3" placeholder="例如：資訊工程學類、心理學類、設計學類..."></textarea>
+      <label>問題 3：缺口與下一步：「要確認這些學類適不適合我，我還需要查證或體驗什麼？」</label>
+      <textarea id="in-q3" rows="3" placeholder="例如：我要確認 X X X 學類適不適合我，我要去了解...去參加..."></textarea>
     </div>
   </div>
 
-  <!-- 右側：即時預覽學習單 -->
-  <div class="preview-panel" id="preview-container">
-    <div class="preview-label">👇 即時預覽（右側自動縮放以符合螢幕寬度）</div>
 
-    <div id="preview-scale-wrapper">
-      <div id="worksheet-sheet">
-        <div class="ws-header">
-          <div class="ws-title-block">
-            <h2>未來想像與生涯進路 2 — 生之意義</h2>
-            <h1>Ikigai 探索職涯生活</h1>
-            <p class="ws-desc">
-              請盡可能地寫下每個面向的答案，<br>
-              從你的生活、學習、人際互動、休閒中找出你所熱愛、擅長、有價值的事情。
-            </p>
-          </div>
-          <div class="ws-student-info">
-            <div>班級：<span class="ws-info-line" id="view-class"></span></div>
-            <div>座號：<span class="ws-info-line" id="view-number"></span></div>
-            <div>姓  名：<span class="ws-info-line" id="view-name"></span></div>
-          </div>
-        </div>
-
-        <div class="venn-wrapper">
-          <svg class="venn-svg" viewBox="0 0 714 700" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="357" cy="195" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
-            <circle cx="357" cy="195" r="181" fill="none" stroke="#1e293b" stroke-width="0.9" stroke-dasharray="12 4" />
-            <circle cx="202" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
-            <circle cx="512" cy="350" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
-            <circle cx="357" cy="505" r="185" fill="none" stroke="#1e293b" stroke-width="2.5" />
-
-            <defs>
-              <path id="arc-top" d="M 225,112 A 156,156 0 0,1 489,112" />
-              <path id="arc-left" d="M 70,268 A 156,156 0 0,0 70,432" />
-              <path id="arc-right" d="M 644,432 A 156,156 0 0,0 644,268" />
-              <path id="arc-bottom" d="M 215,575 A 158,158 0 0,0 499,575" />
-            </defs>
-
-            <text font-size="18.5" font-weight="700" fill="#111">
-              <textPath href="#arc-top" startOffset="50%" text-anchor="middle">享受的事</textPath>
-            </text>
-            <text font-size="18.5" font-weight="700" fill="#111">
-              <textPath href="#arc-left" startOffset="50%" text-anchor="middle">擅長的事</textPath>
-            </text>
-            <text font-size="18.5" font-weight="700" fill="#111">
-              <textPath href="#arc-right" startOffset="50%" text-anchor="middle">世界需要的事</textPath>
-            </text>
-            <text font-size="18" font-weight="700" fill="#111">
-              <textPath href="#arc-bottom" startOffset="50%" text-anchor="middle">別人會付錢請你做的事</textPath>
-            </text>
-
-            <text x="275" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">熱情</text>
-            <text x="439" y="242" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">使命</text>
-            <text x="275" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">專業</text>
-            <text x="439" y="448" font-size="15.5" font-weight="700" fill="#94a3b8" text-anchor="middle">職志</text>
-            <text x="357" y="343" font-size="18.5" font-weight="700" fill="#111" text-anchor="middle">ikigai</text>
-          </svg>
-
-          <div class="venn-box" id="view-love"></div>
-          <div class="venn-box" id="view-good"></div>
-          <div class="venn-box" id="view-need"></div>
-          <div class="venn-box" id="view-paid"></div>
-
-          <div class="venn-box" id="view-passion"></div>
-          <div class="venn-box" id="view-mission"></div>
-          <div class="venn-box" id="view-profession"></div>
-          <div class="venn-box" id="view-vocation"></div>
-          <div class="venn-box" id="view-ikigai"></div>
-        </div>
-
-        <div class="ws-questions">
-          <div class="q-block" id="q1-area">
-            <div class="q-title">1. 要找到自己的 ikigai 不是容易事，哪一個向度目前最符合你的職涯期待？請寫出這一項事務並說明原因：</div>
-            <div class="q-answer" id="view-q1"></div>
-          </div>
-
-          <div class="q-block" id="q2-area">
-            <div class="q-title">2. 缺少的面向，可能會有哪些影響？要達到 ikigai 可以怎麼做？</div>
-            <div class="q-answer" id="view-q2"></div>
-          </div>
-
-          <svg class="paper-plane-svg" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 22,95 C 14,95 9,89 9,82 C 9,74 22,62 22,62 C 22,62 35,74 35,82 C 35,89 30,95 22,95 Z" fill="none" stroke="#334155" stroke-width="2"/>
-            <circle cx="22" cy="81" r="4.5" fill="none" stroke="#334155" stroke-width="2"/>
-            <path d="M 35,88 C 65,98 95,82 88,65 C 82,52 68,62 78,74 C 88,85 115,65 132,42" fill="none" stroke="#334155" stroke-width="1.8"/>
-            <polygon points="122,32 168,14 148,54 138,41" fill="#ffffff" stroke="#334155" stroke-width="2" stroke-linejoin="round"/>
-            <polyline points="168,14 138,41 139,52 145,45" fill="none" stroke="#334155" stroke-width="1.8" stroke-linejoin="round"/>
-          </svg>
-
-          <div class="q-block" id="q3-area">
-            <div class="q-title">3. 這件事物，目前有對應的科系嗎？請寫出可能與之相關的學類，並簡要說明關聯性。</div>
-            <div class="q-answer" id="view-q3"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
