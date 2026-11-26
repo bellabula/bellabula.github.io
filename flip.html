@@ -292,7 +292,7 @@
     /* 學習單畫布 (寬 794px，最低高度 1123px，隨第二部分額外便條數量自動浮動增高) */
     #worksheet-sheet {
       width: 794px;
-      min-height: 1123px;
+/*      min-height: 1123px;*/
       height: auto;
       background: #ffffff;
       position: relative;
@@ -697,7 +697,8 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 14px;
       padding: 0 6px;
     }
 
@@ -904,7 +905,165 @@
 </header>
 
 <div class="main-container">
-  <!-- 左側/上方：引導填答區 -->
+  <!-- 左側/上方：即時預覽原版學習單 -->
+  <div class="preview-panel">
+    <div class="preview-label">👇 即時預覽（點擊學習單上的卡牌縮圖可在右側放大對照，不遮擋左側打字區）</div>
+
+    <div id="worksheet-sheet">
+      <!-- 僅覆蓋在右側學習單區域的卡牌放大預覽框 -->
+      <div id="sheet-zoom-overlay" onclick="closeSheetZoom(event)">
+        <div class="sheet-zoom-card" onclick="event.stopPropagation()">
+          <div class="sheet-zoom-header">
+            <span id="sheet-zoom-title">🃏 卡牌放大對照</span>
+            <button type="button" style="background:#1e293b; color:white; padding:4px 10px; font-size:0.8rem;" onclick="closeSheetZoom()">✕ 關閉放大</button>
+          </div>
+          <img id="sheet-zoom-img" src="" alt="卡牌放大圖">
+        </div>
+      </div>
+
+      <!-- 頂部區域：特質翻轉 ＋ 一、過去、現在及未來 ＋ 人形姓名班級座號 -->
+      <div class="ws-top-area">
+        <h1 class="ws-main-title">特質翻轉</h1>
+        <h2 class="ws-sec1-title">一、過去、現在及未來</h2>
+
+        <div class="ws-person-badge">
+          <svg class="ws-person-svg" viewBox="0 0 130 112" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="65" cy="36" r="32" fill="#ffffff" stroke="#000000" stroke-width="2" />
+            <polygon points="43,62 87,62 118,108 12,108" fill="#ffffff" stroke="#000000" stroke-width="2" />
+            <text x="65" y="58" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">姓名</text>
+            <text x="65" y="80" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">班級座號</text>
+          </svg>
+          <div class="ws-person-name" id="view-name"></div>
+          <div class="ws-person-class" id="view-class"></div>
+        </div>
+      </div>
+
+      <!-- 第一部分：時間軸與三階段 -->
+      <div class="ws-timeline-section">
+        <div class="ws-timeline-bar"></div>
+        <div class="ws-part1-cols">
+          <!-- 過去 -->
+          <div class="ws-stage-col">
+            <div class="ws-drop-header">
+              <div class="ws-teardrop"><span>過去</span></div>
+            </div>
+            <div class="ws-stage-body">
+              <div class="ws-mini-cards">
+                <div class="ws-mini-frame" id="ws-img-past1" onclick="openSheetZoom('past1')">
+                  <span class="ws-mini-placeholder">過去<br>正面</span>
+                </div>
+                <div class="ws-mini-frame" id="ws-img-past2" onclick="openSheetZoom('past2')">
+                  <span class="ws-mini-placeholder">過去<br>背面</span>
+                </div>
+              </div>
+              <div class="ws-sentence-line">
+                曾經是『 <span class="ws-blank" id="view-past-was"></span> 』
+              </div>
+              <div class="ws-sentence-line">
+                但其實我『
+                <span class="ws-blank-block" id="view-past-actually"></span>』
+              </div>
+            </div>
+          </div>
+
+          <!-- 此時此刻 -->
+          <div class="ws-stage-col">
+            <div class="ws-drop-header">
+              <div class="ws-teardrop"><span>此時<br>此刻</span></div>
+            </div>
+            <div class="ws-stage-body">
+              <div class="ws-mini-cards">
+                <div class="ws-mini-frame" id="ws-img-now1" onclick="openSheetZoom('now1')">
+                  <span class="ws-mini-placeholder">此刻<br>卡牌</span>
+                </div>
+              </div>
+              <div class="ws-sentence-line">
+                我是個『 <span class="ws-blank" id="view-now-am"></span> 』的人
+              </div>
+              <div class="ws-sentence-line">
+                它會讓我
+                <span class="ws-blank-block" id="view-now-makes"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 未來 -->
+          <div class="ws-stage-col">
+            <div class="ws-drop-header">
+              <div class="ws-teardrop"><span>未來</span></div>
+            </div>
+            <div class="ws-stage-body">
+              <div class="ws-mini-cards">
+                <div class="ws-mini-frame" id="ws-img-future1" onclick="openSheetZoom('future1')">
+                  <span class="ws-mini-placeholder">未來<br>正面</span>
+                </div>
+                <div class="ws-mini-frame" id="ws-img-future2" onclick="openSheetZoom('future2')">
+                  <span class="ws-mini-placeholder">未來<br>背面</span>
+                </div>
+              </div>
+              <div class="ws-sentence-line">
+                未來的我需要『 <span class="ws-blank" id="view-future-need"></span> 』
+              </div>
+              <div class="ws-sentence-line">
+                但我要留意
+                <span class="ws-blank-block" id="view-future-beware"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二部分：二、我的小優點 -->
+      <div class="ws-sec2-area">
+        <h2 class="ws-sec-heading">二、我的小優點</h2>
+        <div class="ws-peer-grid" id="ws-peer-list"></div>
+
+        <!-- 額外收到的特質與原因（隨文字多寡浮動高度） -->
+        <div class="ws-extra-peer-box" id="ws-extra-peer-box">
+          <div class="ws-extra-peer-title">✨ 其他收到的優點回饋（補充便條）</div>
+          <div class="ws-extra-peer-content" id="view-extra-peers"></div>
+        </div>
+      </div>
+
+      <!-- 第三部分：三、我的小心點 -->
+      <div class="ws-sec3-area">
+        <div>
+          <h2 class="ws-sec-heading" style="margin-left:2px;">三、我的小心點</h2>
+          <div class="ws-sec3-intro">
+            我想改善『 <span class="ws-blank" style="min-width:130px;" id="view-careful-trait"></span> 』，找到這個特質的平衡點。
+          </div>
+
+          <div class="ws-methods-grid">
+            <div class="ws-method-col">
+              <div class="ws-method-header"><span>方法 1</span></div>
+              <div class="ws-method-box" id="view-method1"></div>
+            </div>
+            <div class="ws-method-col">
+              <div class="ws-method-header">
+                <span>方法 2</span>
+                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method2-by"></span></span>
+              </div>
+              <div class="ws-method-box" id="view-method2"></div>
+            </div>
+            <div class="ws-method-col">
+              <div class="ws-method-header">
+                <span>方法 3</span>
+                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method3-by"></span></span>
+              </div>
+              <div class="ws-method-box" id="view-method3"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ws-discovery-box">
+          <div class="ws-discovery-title">◇ 透過今天的活動我發現⋯⋯</div>
+          <div class="ws-discovery-content" id="view-discovery"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側/下方：引導填答區 -->
   <div class="editor-panel">
     <div class="section-title">基本資料</div>
     <div class="form-grid-2">
@@ -1076,164 +1235,6 @@
       <div class="input-group" style="margin-bottom:0;">
         <label>◇ 透過今天的活動我發現⋯⋯</label>
         <textarea id="in-discovery" rows="3" placeholder="寫下今天的活動帶給你的發現、收穫或自由發想..." oninput="syncData()"></textarea>
-      </div>
-    </div>
-  </div>
-
-  <!-- 右側/下方：即時預覽原版學習單 -->
-  <div class="preview-panel">
-    <div class="preview-label">👇 即時預覽（點擊學習單上的卡牌縮圖可在右側放大對照，不遮擋左側打字區）</div>
-
-    <div id="worksheet-sheet">
-      <!-- 僅覆蓋在右側學習單區域的卡牌放大預覽框 -->
-      <div id="sheet-zoom-overlay" onclick="closeSheetZoom(event)">
-        <div class="sheet-zoom-card" onclick="event.stopPropagation()">
-          <div class="sheet-zoom-header">
-            <span id="sheet-zoom-title">🃏 卡牌放大對照</span>
-            <button type="button" style="background:#1e293b; color:white; padding:4px 10px; font-size:0.8rem;" onclick="closeSheetZoom()">✕ 關閉放大</button>
-          </div>
-          <img id="sheet-zoom-img" src="" alt="卡牌放大圖">
-        </div>
-      </div>
-
-      <!-- 頂部區域：特質翻轉 ＋ 一、過去、現在及未來 ＋ 人形姓名班級座號 -->
-      <div class="ws-top-area">
-        <h1 class="ws-main-title">特質翻轉</h1>
-        <h2 class="ws-sec1-title">一、過去、現在及未來</h2>
-
-        <div class="ws-person-badge">
-          <svg class="ws-person-svg" viewBox="0 0 130 112" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="65" cy="36" r="32" fill="#ffffff" stroke="#000000" stroke-width="2" />
-            <polygon points="43,62 87,62 118,108 12,108" fill="#ffffff" stroke="#000000" stroke-width="2" />
-            <text x="65" y="58" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">姓名</text>
-            <text x="65" y="80" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">班級座號</text>
-          </svg>
-          <div class="ws-person-name" id="view-name"></div>
-          <div class="ws-person-class" id="view-class"></div>
-        </div>
-      </div>
-
-      <!-- 第一部分：時間軸與三階段 -->
-      <div class="ws-timeline-section">
-        <div class="ws-timeline-bar"></div>
-        <div class="ws-part1-cols">
-          <!-- 過去 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>過去</span></div>
-            </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-past1" onclick="openSheetZoom('past1')">
-                  <span class="ws-mini-placeholder">過去<br>正面</span>
-                </div>
-                <div class="ws-mini-frame" id="ws-img-past2" onclick="openSheetZoom('past2')">
-                  <span class="ws-mini-placeholder">過去<br>背面</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                曾經是『 <span class="ws-blank" id="view-past-was"></span> 』
-              </div>
-              <div class="ws-sentence-line">
-                但其實我『
-                <span class="ws-blank-block" id="view-past-actually"></span>』
-              </div>
-            </div>
-          </div>
-
-          <!-- 此時此刻 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>此時<br>此刻</span></div>
-            </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-now1" onclick="openSheetZoom('now1')">
-                  <span class="ws-mini-placeholder">此刻<br>卡牌</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                我是個『 <span class="ws-blank" id="view-now-am"></span> 』的人
-              </div>
-              <div class="ws-sentence-line">
-                它會讓我
-                <span class="ws-blank-block" id="view-now-makes"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 未來 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>未來</span></div>
-            </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-future1" onclick="openSheetZoom('future1')">
-                  <span class="ws-mini-placeholder">未來<br>正面</span>
-                </div>
-                <div class="ws-mini-frame" id="ws-img-future2" onclick="openSheetZoom('future2')">
-                  <span class="ws-mini-placeholder">未來<br>背面</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                未來的我需要『 <span class="ws-blank" id="view-future-need"></span> 』
-              </div>
-              <div class="ws-sentence-line">
-                但我要留意
-                <span class="ws-blank-block" id="view-future-beware"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 第二部分：二、我的小優點 -->
-      <div class="ws-sec2-area">
-        <h2 class="ws-sec-heading">二、我的小優點</h2>
-        <div class="ws-peer-grid" id="ws-peer-list"></div>
-
-        <!-- 額外收到的特質與原因（隨文字多寡浮動高度） -->
-        <div class="ws-extra-peer-box" id="ws-extra-peer-box">
-          <div class="ws-extra-peer-title">✨ 其他收到的優點回饋（補充便條）</div>
-          <div class="ws-extra-peer-content" id="view-extra-peers"></div>
-        </div>
-      </div>
-
-      <!-- 第三部分：三、我的小心點 -->
-      <div class="ws-sec3-area">
-        <div>
-          <h2 class="ws-sec-heading" style="margin-left:2px;">三、我的小心點</h2>
-          <div class="ws-sec3-intro">
-            我想改善『 <span class="ws-blank" style="min-width:130px;" id="view-careful-trait"></span> 』，找到這個特質的平衡點。
-          </div>
-
-          <div class="ws-methods-grid">
-            <div class="ws-method-col">
-              <div class="ws-method-header"><span>方法 1</span></div>
-              <div class="ws-method-box" id="view-method1"></div>
-            </div>
-            <div class="ws-method-col">
-              <div class="ws-method-header">
-                <span>方法 2</span>
-                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method2-by"></span></span>
-              </div>
-              <div class="ws-method-box" id="view-method2"></div>
-            </div>
-            <div class="ws-method-col">
-              <div class="ws-method-header">
-                <span>方法 3</span>
-                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method3-by"></span></span>
-              </div>
-              <div class="ws-method-box" id="view-method3"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="ws-discovery-box">
-          <div class="ws-discovery-title">◇ 透過今天的活動我發現⋯⋯</div>
-          <div class="ws-discovery-content" id="view-discovery"></div>
-        </div>
       </div>
     </div>
   </div>
