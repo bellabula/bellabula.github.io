@@ -273,12 +273,13 @@
       background: #fffbeb;
     }
 
-    /* 左側/上方：即時預覽原版學習單區（修正寬度不足時可完整左右滑動且不截斷左緣） */
+    /* 左側/上方：即時預覽原版學習單區（依區域寬度等比例自動縮放） */
     .preview-panel {
       flex: 1.25;
-      min-width: 0; /* 關鍵：允許 Flex 子項縮小並正確觸發內部捲軸 */
+      min-width: 0;
       display: flex;
       flex-direction: column;
+      align-items: center;
       position: relative;
     }
 
@@ -290,20 +291,19 @@
       text-align: center;
     }
 
-    /* 水平滑動容器：寬度不足時從 0px 起算可完整左右滑動，寬度足夠時自動置中 */
-    .preview-scroll-area {
+    /* 等比例縮放外框：寬度 100% 貼合區域，高度由 JS 依縮放比例精準同步 */
+    #worksheet-scale-wrapper {
       width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 12px;
       display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
     }
 
-    /* 學習單畫布 (寬 794px，高度隨內容自動延伸) */
+    /* 學習單畫布 (原始寬度 794px，透過 transform-origin: top center 依區域寬度等比例縮放) */
     #worksheet-sheet {
       width: 794px;
       height: auto;
-      margin: 0 auto; /* 寬度足夠時置中，寬度不足時自動靠左對齊讓捲軸完整滑動 */
       background: #ffffff;
       position: relative;
       box-shadow: 0 8px 26px rgba(0,0,0,0.14);
@@ -312,6 +312,7 @@
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
+      transform-origin: top center;
     }
 
     /* 專屬學習單內的卡牌放大檢視遮罩 */
@@ -537,7 +538,6 @@
       box-shadow: 0 3px 8px rgba(0,0,0,0.18);
     }
 
-    /* 完整顯示整張照片構圖，不裁切邊緣 */
     .ws-mini-frame img {
       width: 100%;
       height: 100%;
@@ -804,6 +804,65 @@
       border-radius: 10px;
     }
 
+    /* Apple 手機/平板專屬匯出儲存視窗（防 Safari 彈窗封鎖） */
+    #ios-export-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.88);
+      z-index: 1300;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .ios-export-box {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    .ios-export-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .ios-export-preview {
+      width: 100%;
+      overflow-y: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f8fafc;
+    }
+
+    .ios-export-preview img {
+      width: 100%;
+      display: block;
+    }
+
+    .ios-export-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+
     #loading-overlay {
       display: none;
       position: fixed;
@@ -836,6 +895,19 @@
   <img id="gift-zoom-img" src="" alt="送禮卡放大檢視">
 </div>
 
+<!-- Apple iPhone / iPad 專屬匯出儲存視窗 -->
+<div id="ios-export-modal" onclick="closeIosExportModal()">
+  <div class="ios-export-box" onclick="event.stopPropagation()">
+    <div class="ios-export-header">
+      <span id="ios-export-title">📄 學習單已準備完成</span>
+      <button type="button" style="background:#e2e8f0; color:#1e293b; padding:5px 10px;" onclick="closeIosExportModal()">✕ 關閉</button>
+    </div>
+    <p id="ios-export-hint" style="font-size:0.84rem; color:#475569; margin:0 0 10px 0;"></p>
+    <div class="ios-export-preview" id="ios-export-preview-area"></div>
+    <div class="ios-export-actions" id="ios-export-actions"></div>
+  </div>
+</div>
+
 <header>
   <h1>🃏 特質翻轉 — Flip 卡牌互動學習單</h1>
   <div class="header-actions">
@@ -848,11 +920,11 @@
 </header>
 
 <div class="main-container">
-  <!-- 左側/上方：即時預覽原版學習單（可完整左右滑動且不截斷左緣） -->
-  <div class="preview-panel">
-    <div class="preview-label">👇 即時預覽（若螢幕較窄可左右滑動完整檢視；點擊卡牌縮圖可放大對照）</div>
+  <!-- 左側/上方：即時預覽原版學習單（依區域寬度等比例自動縮放） -->
+  <div class="preview-panel" id="preview-panel">
+    <div class="preview-label">👇 即時預覽（已依區域寬度自動等比例縮放；點擊卡牌縮圖可放大對照）</div>
 
-    <div class="preview-scroll-area">
+    <div id="worksheet-scale-wrapper">
       <div id="worksheet-sheet">
         <!-- 僅覆蓋在學習單區域內的卡牌放大預覽框 -->
         <div id="sheet-zoom-overlay" onclick="closeSheetZoom(event)">
@@ -1025,7 +1097,7 @@
     <!-- 第一部分 -->
     <div class="section-title">一、過去、現在及未來</div>
     <div class="step-hint">
-      請選出代表「過去」、「此時此刻」、「未來」的三張 Flip 卡牌，點擊格子直接拍照放入（<strong>過去、未來需拍兩面；此刻拍一面</strong>）。拍好後，<strong>直接點擊左側學習單上的卡牌縮圖</strong>即可在左側放大對照，方便你在右側填寫句型！
+      請選出代表「過去」、「此時此刻」、「未來」的三張 Flip 卡牌直接拍照放入（<strong>過去、未來需拍兩面；此刻拍一面</strong>）。拍好後，<strong>直接點擊左側學習單上的卡牌縮圖</strong>即可放大對照，方便你在右側填寫句型！
     </div>
 
     <!-- 1. 過去 -->
@@ -1101,7 +1173,7 @@
         🎁 課前準備：我選好要送給同學的 5 張優點卡（先拍照備忘）
       </div>
       <p style="font-size:0.78rem; color:#78350f; margin:0 0 8px 0;">
-        直接拍下你要送給其他同學的 5 張卡牌（不會印在學習單上；走動分享時點擊已拍照片可放大給同學看）。
+        先拍下你要送給其他同學的 5 張卡牌（不會印在學習單上；走動分享時點擊已拍照片可放大給同學看）。
       </p>
       <div class="photo-slot-grid" style="margin-bottom:0;">
         <div class="photo-card-box" id="slot-box-gift1" onclick="handlePhotoSlotClick('gift1')">
@@ -1222,6 +1294,22 @@
     gift5: '送禮卡 5'
   };
 
+  // ==================== 依區域寬度等比例縮放學習單 ====================
+  function adjustWorksheetScale() {
+    const panel = document.getElementById('preview-panel');
+    const wrapper = document.getElementById('worksheet-scale-wrapper');
+    const sheet = document.getElementById('worksheet-sheet');
+    if (!panel || !wrapper || !sheet) return;
+
+    const availableWidth = panel.clientWidth - 8;
+    const baseWidth = 794;
+    const scale = Math.min(1, availableWidth / baseWidth);
+
+    sheet.style.transform = `scale(${scale})`;
+    const actualHeight = sheet.offsetHeight;
+    wrapper.style.height = (actualHeight * scale + 16) + 'px';
+  }
+
   function initPeerRows() {
     const inputContainer = document.getElementById('peer-inputs-container');
     const wsContainer = document.getElementById('ws-peer-list');
@@ -1276,12 +1364,13 @@
       }
     });
 
-    // 控制「其他收到的優點回饋」浮動區塊顯示或隱藏
     const extraVal = (document.getElementById('in-extra-peers')?.value || '').trim();
     const extraBox = document.getElementById('ws-extra-peer-box');
     if (extraBox) {
       extraBox.style.display = extraVal.length > 0 ? 'block' : 'none';
     }
+
+    adjustWorksheetScale();
 
     try {
       localStorage.setItem('flip_rotate_worksheet_text', JSON.stringify(textData));
@@ -1329,9 +1418,9 @@
         }
       }
     });
+    adjustWorksheetScale();
   }
 
-  // 拍照格點擊（已拍好時詢問放大或重拍）
   function handlePhotoSlotClick(slotKey) {
     if (photoStore[slotKey]) {
       const choice = confirm(`【${photoLabels[slotKey]}】\n按「確定」放大查看照片；\n按「取消」重新拍照。`);
@@ -1349,13 +1438,11 @@
     }
   }
 
-  // 第二部分送禮卡全螢幕大圖檢視
   function openGiftZoomImage(src) {
     document.getElementById('gift-zoom-img').src = src;
     document.getElementById('gift-zoom-modal').style.display = 'flex';
   }
 
-  // 第一部分專屬：限制在學習單區域內的放大預覽
   function openSheetZoom(slotKey) {
     const src = photoStore[slotKey];
     if (!src) return;
@@ -1386,7 +1473,6 @@
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
-        // 保持原始拍攝比例完整縮放（最大邊 900px），不裁切任何畫面邊緣
         const maxDim = 900;
         let targetW = img.width;
         let targetH = img.height;
@@ -1429,14 +1515,17 @@
     const cls = document.getElementById('in-class').value.trim();
     const name = document.getElementById('in-name').value.trim();
     const prefix = [cls, name].filter(Boolean).join('_') || '學生';
+    const fileName = `${prefix}_特質翻轉學習單進度.json`;
 
     const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${prefix}_特質翻轉學習單進度.json`;
+    a.download = fileName;
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function loadProgressFile(event) {
@@ -1467,7 +1556,68 @@
     event.target.value = '';
   }
 
-  // ==================== 匯出 PDF / 圖片（自動支援浮動高度） ====================
+  // ==================== Apple iPhone / iPad 專屬匯出儲存視窗控制 ====================
+  let currentExportObjectUrl = null;
+
+  function closeIosExportModal() {
+    document.getElementById('ios-export-modal').style.display = 'none';
+    if (currentExportObjectUrl) {
+      URL.revokeObjectURL(currentExportObjectUrl);
+      currentExportObjectUrl = null;
+    }
+  }
+
+  function showIosExportModal({ title, hint, previewImgUrl, fileBlob, fileName, mimeType }) {
+    const modal = document.getElementById('ios-export-modal');
+    const titleEl = document.getElementById('ios-export-title');
+    const hintEl = document.getElementById('ios-export-hint');
+    const previewEl = document.getElementById('ios-export-preview-area');
+    const actionsEl = document.getElementById('ios-export-actions');
+
+    titleEl.textContent = title;
+    hintEl.textContent = hint;
+    previewEl.innerHTML = `<img src="${previewImgUrl}" alt="學習單預覽">`;
+    actionsEl.innerHTML = '';
+
+    if (currentExportObjectUrl) URL.revokeObjectURL(currentExportObjectUrl);
+    currentExportObjectUrl = URL.createObjectURL(fileBlob);
+
+    // 1. iOS 原生分享按鈕（可一鍵存相簿、存檔案、傳 AirDrop / Classroom / Line）
+    const fileObj = new File([fileBlob], fileName, { type: mimeType });
+    if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+      const shareBtn = document.createElement('button');
+      shareBtn.type = 'button';
+      shareBtn.className = 'btn-png';
+      shareBtn.textContent = '📤 儲存 / 分享檔案';
+      shareBtn.onclick = async () => {
+        try {
+          await navigator.share({
+            files: [fileObj],
+            title: fileName
+          });
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            alert('若無法開啟分享選單，請使用旁邊的直接開啟/長按儲存方式。');
+          }
+        }
+      };
+      actionsEl.appendChild(shareBtn);
+    }
+
+    // 2. 直接下載 / 開啟預覽連結（由使用者親自點擊，絕不被 Safari 封鎖）
+    const linkBtn = document.createElement('a');
+    linkBtn.href = currentExportObjectUrl;
+    linkBtn.download = fileName;
+    linkBtn.target = '_blank';
+    linkBtn.rel = 'noopener';
+    linkBtn.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:8px;background:#f59e0b;color:#111827;font-weight:700;font-size:0.86rem;text-decoration:none;';
+    linkBtn.textContent = mimeType === 'application/pdf' ? '📄 開啟並儲存 PDF' : '⬇️ 下載圖檔';
+    actionsEl.appendChild(linkBtn);
+
+    modal.style.display = 'flex';
+  }
+
+  // ==================== 匯出 PDF / 圖片（完整支援 Apple 手機與平板） ====================
   async function exportWorksheet(type) {
     closeSheetZoom();
 
@@ -1479,9 +1629,13 @@
     const prefix = [cls, name].filter(Boolean).join('_') || '學生';
     const fileName = `${prefix}_特質翻轉學習單`;
 
+    const sheet = document.getElementById('worksheet-sheet');
+    const origTransform = sheet.style.transform;
+    const origShadow = sheet.style.boxShadow;
+
     try {
-      const sheet = document.getElementById('worksheet-sheet');
-      const origShadow = sheet.style.boxShadow;
+      // 截圖前暫時還原 100% 原始尺寸，確保輸出畫質清晰無縮放失真
+      sheet.style.transform = 'scale(1)';
       sheet.style.boxShadow = 'none';
 
       const canvas = await html2canvas(sheet, {
@@ -1490,18 +1644,26 @@
         backgroundColor: '#ffffff'
       });
 
-      sheet.style.boxShadow = origShadow;
-
       if (type === 'png') {
-        const dataUrl = canvas.toDataURL('image/png');
+        const pngDataUrl = canvas.toDataURL('image/png');
         if (isIOS) {
-          const win = window.open();
-          win.document.write(`<img src="${dataUrl}" style="width:100%;"><p style="text-align:center;font-family:sans-serif;">請長按上方學習單圖片選擇「儲存到照片」</p>`);
+          canvas.toBlob((blob) => {
+            showIosExportModal({
+              title: '🖼️ 學習單圖片已生成',
+              hint: '請點擊下方「儲存 / 分享檔案」選擇「儲存影像」，或直接長按上方圖片儲存到相簿：',
+              previewImgUrl: pngDataUrl,
+              fileBlob: blob,
+              fileName: `${fileName}.png`,
+              mimeType: 'image/png'
+            });
+          }, 'image/png');
         } else {
           const link = document.createElement('a');
           link.download = `${fileName}.png`;
-          link.href = dataUrl;
+          link.href = pngDataUrl;
+          document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
         }
       } else if (type === 'pdf') {
         const { jsPDF } = window.jspdf;
@@ -1518,8 +1680,15 @@
         pdf.addImage(imgData, 'JPEG', 0, 0, imgWidthMm, imgHeightMm);
 
         if (isIOS) {
-          const blob = pdf.output('blob');
-          window.open(URL.createObjectURL(blob), '_blank');
+          const pdfBlob = pdf.output('blob');
+          showIosExportModal({
+            title: '📄 學習單 PDF 已生成',
+            hint: '請點擊下方「儲存 / 分享檔案」選擇「儲存到檔案」，或點「開啟並儲存 PDF」後按右上角分享鈕存檔：',
+            previewImgUrl: imgData,
+            fileBlob: pdfBlob,
+            fileName: `${fileName}.pdf`,
+            mimeType: 'application/pdf'
+          });
         } else {
           pdf.save(`${fileName}.pdf`);
         }
@@ -1527,6 +1696,9 @@
     } catch (err) {
       alert('匯出時發生錯誤：' + err.message);
     } finally {
+      sheet.style.transform = origTransform;
+      sheet.style.boxShadow = origShadow;
+      adjustWorksheetScale();
       overlay.style.display = 'none';
     }
   }
@@ -1543,6 +1715,8 @@
     syncData();
     renderAllPhotos();
   }
+
+  window.addEventListener('resize', adjustWorksheetScale);
 
   window.addEventListener('DOMContentLoaded', () => {
     initPeerRows();
@@ -1564,6 +1738,7 @@
 
     syncData();
     renderAllPhotos();
+    adjustWorksheetScale();
   });
 </script>
 
