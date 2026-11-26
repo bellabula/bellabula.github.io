@@ -97,10 +97,10 @@
       width: 100%;
     }
 
-    /* 左側/上方：引導填答區 */
+    /* 右側/下方：引導填答區 */
     .editor-panel {
       flex: 1;
-      min-width: 340px;
+      min-width: 320px;
       background: var(--card-bg);
       border-radius: 14px;
       padding: 18px;
@@ -225,7 +225,8 @@
     .photo-card-box img {
       width: 100%;
       height: 82px;
-      object-fit: cover;
+      object-fit: contain;
+      background: #f8fafc;
       border-radius: 5px;
       margin-bottom: 3px;
     }
@@ -272,13 +273,12 @@
       background: #fffbeb;
     }
 
-    /* 右側/下方：即時預覽原版學習單區 */
+    /* 左側/上方：即時預覽原版學習單區（修正寬度不足時可完整左右滑動且不截斷左緣） */
     .preview-panel {
       flex: 1.25;
+      min-width: 0; /* 關鍵：允許 Flex 子項縮小並正確觸發內部捲軸 */
       display: flex;
       flex-direction: column;
-      align-items: center;
-      overflow-x: auto;
       position: relative;
     }
 
@@ -287,13 +287,23 @@
       color: #64748b;
       margin-bottom: 8px;
       font-weight: 500;
+      text-align: center;
     }
 
-    /* 學習單畫布 (寬 794px，最低高度 1123px，隨第二部分額外便條數量自動浮動增高) */
+    /* 水平滑動容器：寬度不足時從 0px 起算可完整左右滑動，寬度足夠時自動置中 */
+    .preview-scroll-area {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      display: flex;
+    }
+
+    /* 學習單畫布 (寬 794px，高度隨內容自動延伸) */
     #worksheet-sheet {
       width: 794px;
-/*      min-height: 1123px;*/
       height: auto;
+      margin: 0 auto; /* 寬度足夠時置中，寬度不足時自動靠左對齊讓捲軸完整滑動 */
       background: #ffffff;
       position: relative;
       box-shadow: 0 8px 26px rgba(0,0,0,0.14);
@@ -304,7 +314,7 @@
       flex-direction: column;
     }
 
-    /* 專屬學習單右側內的卡牌放大檢視遮罩（不遮擋左側作答區） */
+    /* 專屬學習單內的卡牌放大檢視遮罩 */
     #sheet-zoom-overlay {
       display: none;
       position: absolute;
@@ -527,10 +537,12 @@
       box-shadow: 0 3px 8px rgba(0,0,0,0.18);
     }
 
+    /* 完整顯示整張照片構圖，不裁切邊緣 */
     .ws-mini-frame img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background: #ffffff;
     }
 
     .ws-mini-placeholder {
@@ -673,7 +685,7 @@
       border-radius: 8px;
       background: #fefce8;
       padding: 7px 12px;
-      display: none; /* 有輸入內容時自動展開並隨文字高度浮動 */
+      display: none;
     }
 
     .ws-extra-peer-title {
@@ -775,56 +787,6 @@
       background-image: repeating-linear-gradient(transparent, transparent 23px, #cbd5e1 24px);
     }
 
-    /* 圖片裁切 Modal */
-    #crop-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.84);
-      z-index: 1000;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .crop-container {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 16px;
-      max-width: 500px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .crop-stage {
-      position: relative;
-      width: 100%;
-      height: 330px;
-      background: #0f172a;
-      margin: 10px 0;
-      overflow: hidden;
-      border-radius: 8px;
-      touch-action: none;
-      user-select: none;
-    }
-
-    #crop-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .crop-slider-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-    .crop-slider-row input { flex: 1; }
-
     /* 送禮卡全螢幕大圖檢視 Modal */
     #gift-zoom-modal {
       display: none;
@@ -865,28 +827,9 @@
 
 <div id="loading-overlay">⏳ 正在生成學習單檔案，請稍候...</div>
 
+<!-- 隱藏的相機拍照輸入框（拍完直接放入，無裁切視窗） -->
 <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleImageSelected(event)">
 <input type="file" id="progress-file-input" accept=".json" style="display:none" onchange="loadProgressFile(event)">
-
-<!-- 圖片裁切視窗 -->
-<div id="crop-modal">
-  <div class="crop-container">
-    <h3 style="margin:0; font-size:1.05rem; color:#111827;">✂️ 拖曳與縮放裁切卡牌照片</h3>
-    <p style="margin:4px 0 0 0; font-size:0.8rem; color:#64748b;">手指拖曳移動照片，調整縮放拉桿讓卡牌對準綠框</p>
-    <div class="crop-stage" id="crop-stage">
-      <canvas id="crop-canvas"></canvas>
-    </div>
-    <div class="crop-slider-row">
-      <span>🔍 縮放：</span>
-      <input type="range" id="crop-zoom" min="0.3" max="3" step="0.02" value="1" oninput="drawCropPreview()">
-      <button type="button" class="btn-save" style="padding:4px 9px; font-size:0.78rem;" onclick="rotateCropImage(90)">↻ 旋轉</button>
-    </div>
-    <div style="display:flex; justify-content:center; gap:12px;">
-      <button type="button" style="background:#cbd5e1; color:#1e293b;" onclick="closeCropModal()">取消</button>
-      <button type="button" class="btn-png" onclick="confirmCrop()">✅ 裁切並放入</button>
-    </div>
-  </div>
-</div>
 
 <!-- 送禮卡全螢幕大圖檢視視窗（走動給同學看用） -->
 <div id="gift-zoom-modal" onclick="this.style.display='none'">
@@ -905,159 +848,161 @@
 </header>
 
 <div class="main-container">
-  <!-- 左側/上方：即時預覽原版學習單 -->
+  <!-- 左側/上方：即時預覽原版學習單（可完整左右滑動且不截斷左緣） -->
   <div class="preview-panel">
-    <div class="preview-label">👇 即時預覽（點擊學習單上的卡牌縮圖可在右側放大對照，不遮擋左側打字區）</div>
+    <div class="preview-label">👇 即時預覽（若螢幕較窄可左右滑動完整檢視；點擊卡牌縮圖可放大對照）</div>
 
-    <div id="worksheet-sheet">
-      <!-- 僅覆蓋在右側學習單區域的卡牌放大預覽框 -->
-      <div id="sheet-zoom-overlay" onclick="closeSheetZoom(event)">
-        <div class="sheet-zoom-card" onclick="event.stopPropagation()">
-          <div class="sheet-zoom-header">
-            <span id="sheet-zoom-title">🃏 卡牌放大對照</span>
-            <button type="button" style="background:#1e293b; color:white; padding:4px 10px; font-size:0.8rem;" onclick="closeSheetZoom()">✕ 關閉放大</button>
-          </div>
-          <img id="sheet-zoom-img" src="" alt="卡牌放大圖">
-        </div>
-      </div>
-
-      <!-- 頂部區域：特質翻轉 ＋ 一、過去、現在及未來 ＋ 人形姓名班級座號 -->
-      <div class="ws-top-area">
-        <h1 class="ws-main-title">特質翻轉</h1>
-        <h2 class="ws-sec1-title">一、過去、現在及未來</h2>
-
-        <div class="ws-person-badge">
-          <svg class="ws-person-svg" viewBox="0 0 130 112" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="65" cy="36" r="32" fill="#ffffff" stroke="#000000" stroke-width="2" />
-            <polygon points="43,62 87,62 118,108 12,108" fill="#ffffff" stroke="#000000" stroke-width="2" />
-            <text x="65" y="58" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">姓名</text>
-            <text x="65" y="80" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">班級座號</text>
-          </svg>
-          <div class="ws-person-name" id="view-name"></div>
-          <div class="ws-person-class" id="view-class"></div>
-        </div>
-      </div>
-
-      <!-- 第一部分：時間軸與三階段 -->
-      <div class="ws-timeline-section">
-        <div class="ws-timeline-bar"></div>
-        <div class="ws-part1-cols">
-          <!-- 過去 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>過去</span></div>
+    <div class="preview-scroll-area">
+      <div id="worksheet-sheet">
+        <!-- 僅覆蓋在學習單區域內的卡牌放大預覽框 -->
+        <div id="sheet-zoom-overlay" onclick="closeSheetZoom(event)">
+          <div class="sheet-zoom-card" onclick="event.stopPropagation()">
+            <div class="sheet-zoom-header">
+              <span id="sheet-zoom-title">🃏 卡牌放大對照</span>
+              <button type="button" style="background:#1e293b; color:white; padding:4px 10px; font-size:0.8rem;" onclick="closeSheetZoom()">✕ 關閉放大</button>
             </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-past1" onclick="openSheetZoom('past1')">
-                  <span class="ws-mini-placeholder">過去<br>正面</span>
-                </div>
-                <div class="ws-mini-frame" id="ws-img-past2" onclick="openSheetZoom('past2')">
-                  <span class="ws-mini-placeholder">過去<br>背面</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                曾經是『 <span class="ws-blank" id="view-past-was"></span> 』
-              </div>
-              <div class="ws-sentence-line">
-                但其實我『
-                <span class="ws-blank-block" id="view-past-actually"></span>』
-              </div>
-            </div>
-          </div>
-
-          <!-- 此時此刻 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>此時<br>此刻</span></div>
-            </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-now1" onclick="openSheetZoom('now1')">
-                  <span class="ws-mini-placeholder">此刻<br>卡牌</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                我是個『 <span class="ws-blank" id="view-now-am"></span> 』的人
-              </div>
-              <div class="ws-sentence-line">
-                它會讓我
-                <span class="ws-blank-block" id="view-now-makes"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 未來 -->
-          <div class="ws-stage-col">
-            <div class="ws-drop-header">
-              <div class="ws-teardrop"><span>未來</span></div>
-            </div>
-            <div class="ws-stage-body">
-              <div class="ws-mini-cards">
-                <div class="ws-mini-frame" id="ws-img-future1" onclick="openSheetZoom('future1')">
-                  <span class="ws-mini-placeholder">未來<br>正面</span>
-                </div>
-                <div class="ws-mini-frame" id="ws-img-future2" onclick="openSheetZoom('future2')">
-                  <span class="ws-mini-placeholder">未來<br>背面</span>
-                </div>
-              </div>
-              <div class="ws-sentence-line">
-                未來的我需要『 <span class="ws-blank" id="view-future-need"></span> 』
-              </div>
-              <div class="ws-sentence-line">
-                但我要留意
-                <span class="ws-blank-block" id="view-future-beware"></span>
-              </div>
-            </div>
+            <img id="sheet-zoom-img" src="" alt="卡牌放大圖">
           </div>
         </div>
-      </div>
 
-      <!-- 第二部分：二、我的小優點 -->
-      <div class="ws-sec2-area">
-        <h2 class="ws-sec-heading">二、我的小優點</h2>
-        <div class="ws-peer-grid" id="ws-peer-list"></div>
+        <!-- 頂部區域：特質翻轉 ＋ 一、過去、現在及未來 ＋ 人形姓名班級座號 -->
+        <div class="ws-top-area">
+          <h1 class="ws-main-title">特質翻轉</h1>
+          <h2 class="ws-sec1-title">一、過去、現在及未來</h2>
 
-        <!-- 額外收到的特質與原因（隨文字多寡浮動高度） -->
-        <div class="ws-extra-peer-box" id="ws-extra-peer-box">
-          <div class="ws-extra-peer-title">✨ 其他收到的優點回饋（補充便條）</div>
-          <div class="ws-extra-peer-content" id="view-extra-peers"></div>
-        </div>
-      </div>
-
-      <!-- 第三部分：三、我的小心點 -->
-      <div class="ws-sec3-area">
-        <div>
-          <h2 class="ws-sec-heading" style="margin-left:2px;">三、我的小心點</h2>
-          <div class="ws-sec3-intro">
-            我想改善『 <span class="ws-blank" style="min-width:130px;" id="view-careful-trait"></span> 』，找到這個特質的平衡點。
+          <div class="ws-person-badge">
+            <svg class="ws-person-svg" viewBox="0 0 130 112" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="65" cy="36" r="32" fill="#ffffff" stroke="#000000" stroke-width="2" />
+              <polygon points="43,62 87,62 118,108 12,108" fill="#ffffff" stroke="#000000" stroke-width="2" />
+              <text x="65" y="58" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">姓名</text>
+              <text x="65" y="80" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">班級座號</text>
+            </svg>
+            <div class="ws-person-name" id="view-name"></div>
+            <div class="ws-person-class" id="view-class"></div>
           </div>
+        </div>
 
-          <div class="ws-methods-grid">
-            <div class="ws-method-col">
-              <div class="ws-method-header"><span>方法 1</span></div>
-              <div class="ws-method-box" id="view-method1"></div>
-            </div>
-            <div class="ws-method-col">
-              <div class="ws-method-header">
-                <span>方法 2</span>
-                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method2-by"></span></span>
+        <!-- 第一部分：時間軸與三階段 -->
+        <div class="ws-timeline-section">
+          <div class="ws-timeline-bar"></div>
+          <div class="ws-part1-cols">
+            <!-- 過去 -->
+            <div class="ws-stage-col">
+              <div class="ws-drop-header">
+                <div class="ws-teardrop"><span>過去</span></div>
               </div>
-              <div class="ws-method-box" id="view-method2"></div>
-            </div>
-            <div class="ws-method-col">
-              <div class="ws-method-header">
-                <span>方法 3</span>
-                <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method3-by"></span></span>
+              <div class="ws-stage-body">
+                <div class="ws-mini-cards">
+                  <div class="ws-mini-frame" id="ws-img-past1" onclick="openSheetZoom('past1')">
+                    <span class="ws-mini-placeholder">過去<br>正面</span>
+                  </div>
+                  <div class="ws-mini-frame" id="ws-img-past2" onclick="openSheetZoom('past2')">
+                    <span class="ws-mini-placeholder">過去<br>背面</span>
+                  </div>
+                </div>
+                <div class="ws-sentence-line">
+                  曾經是『 <span class="ws-blank" id="view-past-was"></span> 』
+                </div>
+                <div class="ws-sentence-line">
+                  但其實我『
+                  <span class="ws-blank-block" id="view-past-actually"></span>』
+                </div>
               </div>
-              <div class="ws-method-box" id="view-method3"></div>
+            </div>
+
+            <!-- 此時此刻 -->
+            <div class="ws-stage-col">
+              <div class="ws-drop-header">
+                <div class="ws-teardrop"><span>此時<br>此刻</span></div>
+              </div>
+              <div class="ws-stage-body">
+                <div class="ws-mini-cards">
+                  <div class="ws-mini-frame" id="ws-img-now1" onclick="openSheetZoom('now1')">
+                    <span class="ws-mini-placeholder">此刻<br>卡牌</span>
+                  </div>
+                </div>
+                <div class="ws-sentence-line">
+                  我是個『 <span class="ws-blank" id="view-now-am"></span> 』的人
+                </div>
+                <div class="ws-sentence-line">
+                  它會讓我
+                  <span class="ws-blank-block" id="view-now-makes"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 未來 -->
+            <div class="ws-stage-col">
+              <div class="ws-drop-header">
+                <div class="ws-teardrop"><span>未來</span></div>
+              </div>
+              <div class="ws-stage-body">
+                <div class="ws-mini-cards">
+                  <div class="ws-mini-frame" id="ws-img-future1" onclick="openSheetZoom('future1')">
+                    <span class="ws-mini-placeholder">未來<br>正面</span>
+                  </div>
+                  <div class="ws-mini-frame" id="ws-img-future2" onclick="openSheetZoom('future2')">
+                    <span class="ws-mini-placeholder">未來<br>背面</span>
+                  </div>
+                </div>
+                <div class="ws-sentence-line">
+                  未來的我需要『 <span class="ws-blank" id="view-future-need"></span> 』
+                </div>
+                <div class="ws-sentence-line">
+                  但我要留意
+                  <span class="ws-blank-block" id="view-future-beware"></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="ws-discovery-box">
-          <div class="ws-discovery-title">◇ 透過今天的活動我發現⋯⋯</div>
-          <div class="ws-discovery-content" id="view-discovery"></div>
+        <!-- 第二部分：二、我的小優點 -->
+        <div class="ws-sec2-area">
+          <h2 class="ws-sec-heading">二、我的小優點</h2>
+          <div class="ws-peer-grid" id="ws-peer-list"></div>
+
+          <!-- 額外收到的特質與原因（隨文字多寡浮動高度） -->
+          <div class="ws-extra-peer-box" id="ws-extra-peer-box">
+            <div class="ws-extra-peer-title">✨ 其他收到的優點回饋（補充便條）</div>
+            <div class="ws-extra-peer-content" id="view-extra-peers"></div>
+          </div>
+        </div>
+
+        <!-- 第三部分：三、我的小心點 -->
+        <div class="ws-sec3-area">
+          <div>
+            <h2 class="ws-sec-heading" style="margin-left:2px;">三、我的小心點</h2>
+            <div class="ws-sec3-intro">
+              我想改善『 <span class="ws-blank" style="min-width:130px;" id="view-careful-trait"></span> 』，找到這個特質的平衡點。
+            </div>
+
+            <div class="ws-methods-grid">
+              <div class="ws-method-col">
+                <div class="ws-method-header"><span>方法 1</span></div>
+                <div class="ws-method-box" id="view-method1"></div>
+              </div>
+              <div class="ws-method-col">
+                <div class="ws-method-header">
+                  <span>方法 2</span>
+                  <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method2-by"></span></span>
+                </div>
+                <div class="ws-method-box" id="view-method2"></div>
+              </div>
+              <div class="ws-method-col">
+                <div class="ws-method-header">
+                  <span>方法 3</span>
+                  <span style="font-size:11.5px;">提供者：<span class="ws-provider-blank" id="view-method3-by"></span></span>
+                </div>
+                <div class="ws-method-box" id="view-method3"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ws-discovery-box">
+            <div class="ws-discovery-title">◇ 透過今天的活動我發現⋯⋯</div>
+            <div class="ws-discovery-content" id="view-discovery"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1080,7 +1025,7 @@
     <!-- 第一部分 -->
     <div class="section-title">一、過去、現在及未來</div>
     <div class="step-hint">
-      請選出代表「過去」、「此時此刻」、「未來」的三張 Flip 卡牌拍照裁切（<strong>過去、未來需拍兩面；此刻拍一面</strong>）。拍好後，<strong>直接點擊右側學習單上的卡牌縮圖</strong>即可在右側放大對照，方便你在左側填寫句型！
+      請選出代表「過去」、「此時此刻」、「未來」的三張 Flip 卡牌，點擊格子直接拍照放入（<strong>過去、未來需拍兩面；此刻拍一面</strong>）。拍好後，<strong>直接點擊左側學習單上的卡牌縮圖</strong>即可在左側放大對照，方便你在右側填寫句型！
     </div>
 
     <!-- 1. 過去 -->
@@ -1089,11 +1034,11 @@
       <div class="photo-slot-grid">
         <div class="photo-card-box" id="slot-box-past1" onclick="handlePhotoSlotClick('past1')">
           <span class="photo-slot-label">📷 過去（正面）</span>
-          <span class="photo-slot-sub">點擊拍照裁切</span>
+          <span class="photo-slot-sub">點擊直接拍照</span>
         </div>
         <div class="photo-card-box" id="slot-box-past2" onclick="handlePhotoSlotClick('past2')">
           <span class="photo-slot-label">📷 過去（背面）</span>
-          <span class="photo-slot-sub">點擊拍照裁切</span>
+          <span class="photo-slot-sub">點擊直接拍照</span>
         </div>
       </div>
       <div class="input-group">
@@ -1112,7 +1057,7 @@
       <div class="photo-slot-grid" style="max-width: 150px;">
         <div class="photo-card-box" id="slot-box-now1" onclick="handlePhotoSlotClick('now1')">
           <span class="photo-slot-label">📷 此刻（單面）</span>
-          <span class="photo-slot-sub">點擊拍照裁切</span>
+          <span class="photo-slot-sub">點擊直接拍照</span>
         </div>
       </div>
       <div class="input-group">
@@ -1131,11 +1076,11 @@
       <div class="photo-slot-grid">
         <div class="photo-card-box" id="slot-box-future1" onclick="handlePhotoSlotClick('future1')">
           <span class="photo-slot-label">📷 未來（正面）</span>
-          <span class="photo-slot-sub">點擊拍照裁切</span>
+          <span class="photo-slot-sub">點擊直接拍照</span>
         </div>
         <div class="photo-card-box" id="slot-box-future2" onclick="handlePhotoSlotClick('future2')">
           <span class="photo-slot-label">📷 未來（背面）</span>
-          <span class="photo-slot-sub">點擊拍照裁切</span>
+          <span class="photo-slot-sub">點擊直接拍照</span>
         </div>
       </div>
       <div class="input-group">
@@ -1156,7 +1101,7 @@
         🎁 課前準備：我選好要送給同學的 5 張優點卡（先拍照備忘）
       </div>
       <p style="font-size:0.78rem; color:#78350f; margin:0 0 8px 0;">
-        先拍下你要送給其他同學的 5 張卡牌（不會印在學習單上；走動分享時點擊已拍照片可放大給同學看）。
+        直接拍下你要送給其他同學的 5 張卡牌（不會印在學習單上；走動分享時點擊已拍照片可放大給同學看）。
       </p>
       <div class="photo-slot-grid" style="margin-bottom:0;">
         <div class="photo-card-box" id="slot-box-gift1" onclick="handlePhotoSlotClick('gift1')">
@@ -1187,13 +1132,13 @@
     </div>
     <div id="peer-inputs-container"></div>
 
-    <!-- 新增：超過五個以上的其他特質回饋（自動浮動高度） -->
+    <!-- 超過五個以上的其他特質回饋（自動浮動高度） -->
     <div class="extra-feedback-editor">
       <div style="font-size:0.86rem; font-weight:700; color:#92400e; margin-bottom:4px;">
         ➕ 其他收到的優點回饋（若收到超過 5 張便條，請補充在這裡）
       </div>
       <p style="font-size:0.78rem; color:#78350f; margin:0 0 6px 0;">
-        每行填寫一筆（例如：12號【溫暖體貼】因為我總是在同學難過時主動關心），右側學習單會自動隨內容增加高度！
+        每行填寫一筆（例如：12號【溫暖體貼】因為我總是在同學難過時主動關心），左側學習單會自動隨內容增加高度！
       </p>
       <textarea id="in-extra-peers" rows="3" placeholder="例如：&#10;12號【溫暖體貼】因為我總是在同學難過時主動關心&#10;25號【幽默風趣】因為我講話很有梗讓大家很開心" oninput="syncData()"></textarea>
     </div>
@@ -1367,7 +1312,7 @@
           editorBox.classList.remove('has-img');
           editorBox.innerHTML = `
             <span class="photo-slot-label">${slotKey.startsWith('gift') ? '🎁' : '📷'} ${photoLabels[slotKey]}</span>
-            <span class="photo-slot-sub">點擊拍照</span>
+            <span class="photo-slot-sub">點擊直接拍照</span>
           `;
         }
       }
@@ -1386,10 +1331,10 @@
     });
   }
 
-  // 左側拍照格點擊（第一部分與第二部分送禮卡一致：已拍好時詢問放大或重拍）
+  // 拍照格點擊（已拍好時詢問放大或重拍）
   function handlePhotoSlotClick(slotKey) {
     if (photoStore[slotKey]) {
-      const choice = confirm(`【${photoLabels[slotKey]}】\n按「確定」放大查看照片；\n按「取消」重新拍照裁切。`);
+      const choice = confirm(`【${photoLabels[slotKey]}】\n按「確定」放大查看照片；\n按「取消」重新拍照。`);
       if (choice) {
         if (slotKey.startsWith('gift')) {
           openGiftZoomImage(photoStore[slotKey]);
@@ -1410,10 +1355,10 @@
     document.getElementById('gift-zoom-modal').style.display = 'flex';
   }
 
-  // 第一部分專屬：限制在右側學習單區域內的放大預覽（不遮擋左側填答區）
+  // 第一部分專屬：限制在學習單區域內的放大預覽
   function openSheetZoom(slotKey) {
     const src = photoStore[slotKey];
-    if (!src) return; // 未拍照時點擊學習單空格不動作
+    if (!src) return;
     document.getElementById('sheet-zoom-title').textContent = `🃏 ${photoLabels[slotKey]} — 放大對照`;
     document.getElementById('sheet-zoom-img').src = src;
     document.getElementById('sheet-zoom-overlay').style.display = 'flex';
@@ -1423,10 +1368,8 @@
     document.getElementById('sheet-zoom-overlay').style.display = 'none';
   }
 
-  // ==================== 相機拍照與互動裁切 ====================
+  // ==================== 相機拍照直接放入（無裁切功能） ====================
   let currentTargetSlot = null;
-  let cropImgObj = new Image();
-  let cropState = { x: 0, y: 0, scale: 1, rotation: 0, dragging: false, lastX: 0, lastY: 0 };
 
   function triggerPhoto(slotKey) {
     currentTargetSlot = slotKey;
@@ -1437,136 +1380,41 @@
 
   function handleImageSelected(event) {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file || !currentTargetSlot) return;
+
     const reader = new FileReader();
     reader.onload = function(e) {
-      cropImgObj = new Image();
-      cropImgObj.onload = openCropModal;
-      cropImgObj.src = e.target.result;
+      const img = new Image();
+      img.onload = function() {
+        // 保持原始拍攝比例完整縮放（最大邊 900px），不裁切任何畫面邊緣
+        const maxDim = 900;
+        let targetW = img.width;
+        let targetH = img.height;
+        if (targetW > maxDim || targetH > maxDim) {
+          if (targetW > targetH) {
+            targetH = Math.round((targetH * maxDim) / targetW);
+            targetW = maxDim;
+          } else {
+            targetW = Math.round((targetW * maxDim) / targetH);
+            targetH = maxDim;
+          }
+        }
+
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = targetW;
+        outCanvas.height = targetH;
+        const outCtx = outCanvas.getContext('2d');
+        outCtx.fillStyle = '#ffffff';
+        outCtx.fillRect(0, 0, targetW, targetH);
+        outCtx.drawImage(img, 0, 0, targetW, targetH);
+
+        photoStore[currentTargetSlot] = outCanvas.toDataURL('image/jpeg', 0.85);
+        renderAllPhotos();
+        savePhotosToStorage();
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-  }
-
-  function openCropModal() {
-    document.getElementById('crop-modal').style.display = 'flex';
-    const canvas = document.getElementById('crop-canvas');
-    const stage = document.getElementById('crop-stage');
-    canvas.width = stage.clientWidth;
-    canvas.height = stage.clientHeight;
-
-    const fitScale = Math.min(canvas.width / cropImgObj.width, canvas.height / cropImgObj.height) * 0.85;
-    cropState = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      scale: fitScale,
-      rotation: 0,
-      dragging: false,
-      lastX: 0,
-      lastY: 0
-    };
-    document.getElementById('crop-zoom').value = fitScale;
-    drawCropPreview();
-  }
-
-  function closeCropModal() {
-    document.getElementById('crop-modal').style.display = 'none';
-  }
-
-  function rotateCropImage(deg) {
-    cropState.rotation = (cropState.rotation + deg) % 360;
-    drawCropPreview();
-  }
-
-  function getCropBoxRect(canvas) {
-    const boxH = Math.min(canvas.height * 0.82, 260);
-    const boxW = boxH * 0.75;
-    return {
-      x: (canvas.width - boxW) / 2,
-      y: (canvas.height - boxH) / 2,
-      w: boxW,
-      h: boxH
-    };
-  }
-
-  function drawCropPreview() {
-    const canvas = document.getElementById('crop-canvas');
-    const ctx = canvas.getContext('2d');
-    cropState.scale = parseFloat(document.getElementById('crop-zoom').value);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-    ctx.translate(cropState.x, cropState.y);
-    ctx.rotate((cropState.rotation * Math.PI) / 180);
-    ctx.scale(cropState.scale, cropState.scale);
-    ctx.drawImage(cropImgObj, -cropImgObj.width / 2, -cropImgObj.height / 2);
-    ctx.restore();
-
-    const box = getCropBoxRect(canvas);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-    ctx.fillRect(0, 0, canvas.width, box.y);
-    ctx.fillRect(0, box.y + box.h, canvas.width, canvas.height - (box.y + box.h));
-    ctx.fillRect(0, box.y, box.x, box.h);
-    ctx.fillRect(box.x + box.w, box.y, canvas.width - (box.x + box.w), box.h);
-
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(box.x, box.y, box.w, box.h);
-  }
-
-  function confirmCrop() {
-    const canvas = document.getElementById('crop-canvas');
-    const box = getCropBoxRect(canvas);
-
-    const outCanvas = document.createElement('canvas');
-    outCanvas.width = 360;
-    outCanvas.height = 480;
-    const outCtx = outCanvas.getContext('2d');
-
-    const ratio = outCanvas.width / box.w;
-    outCtx.fillStyle = '#ffffff';
-    outCtx.fillRect(0, 0, outCanvas.width, outCanvas.height);
-
-    outCtx.save();
-    outCtx.translate((cropState.x - box.x) * ratio, (cropState.y - box.y) * ratio);
-    outCtx.rotate((cropState.rotation * Math.PI) / 180);
-    outCtx.scale(cropState.scale * ratio, cropState.scale * ratio);
-    outCtx.drawImage(cropImgObj, -cropImgObj.width / 2, -cropImgObj.height / 2);
-    outCtx.restore();
-
-    const croppedDataUrl = outCanvas.toDataURL('image/jpeg', 0.85);
-    if (currentTargetSlot) {
-      photoStore[currentTargetSlot] = croppedDataUrl;
-      renderAllPhotos();
-      savePhotosToStorage();
-    }
-    closeCropModal();
-  }
-
-  function initCropGestures() {
-    const stage = document.getElementById('crop-stage');
-    const startDrag = (x, y) => { cropState.dragging = true; cropState.lastX = x; cropState.lastY = y; };
-    const moveDrag = (x, y) => {
-      if (!cropState.dragging) return;
-      cropState.x += x - cropState.lastX;
-      cropState.y += y - cropState.lastY;
-      cropState.lastX = x;
-      cropState.lastY = y;
-      drawCropPreview();
-    };
-    const endDrag = () => { cropState.dragging = false; };
-
-    stage.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
-    window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
-    window.addEventListener('mouseup', endDrag);
-
-    stage.addEventListener('touchstart', e => {
-      if (e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    stage.addEventListener('touchmove', e => {
-      if (e.touches.length === 1) { e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); }
-    }, { passive: false });
-    stage.addEventListener('touchend', endDrag);
   }
 
   // ==================== 暫存與讀取進度 ====================
@@ -1621,7 +1469,6 @@
 
   // ==================== 匯出 PDF / 圖片（自動支援浮動高度） ====================
   async function exportWorksheet(type) {
-    // 匯出前先確保右側放大遮罩已關閉，避免被截圖進去
     closeSheetZoom();
 
     const overlay = document.getElementById('loading-overlay');
@@ -1658,7 +1505,6 @@
         }
       } else if (type === 'pdf') {
         const { jsPDF } = window.jspdf;
-        // 依據學習單實際浮動高度計算對應毫米高度，確保長版面也不會被壓扁或裁切
         const imgWidthMm = 210;
         const imgHeightMm = (canvas.height * imgWidthMm) / canvas.width;
         const pdfHeightMm = Math.max(297, imgHeightMm);
@@ -1700,7 +1546,6 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     initPeerRows();
-    initCropGestures();
 
     try {
       const savedText = JSON.parse(localStorage.getItem('flip_rotate_worksheet_text') || '{}');
